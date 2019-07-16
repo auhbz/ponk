@@ -44,6 +44,23 @@ let hitSound;
 document.addEventListener('DOMContentLoaded', SetupCanvas());
 
 //setup
+function SetupCanvas() {
+    canvas = document.getElementById('game-canvas');
+    context = canvas.getContext('2d');
+    canvas.width = 1400;
+    canvas.height = 1000;
+    player = new Paddle('left');
+    aiPlayer = new Paddle('poop');
+    ball = new Ball(7);
+    aiPlayer.speed = 6.5;
+    startTarget = player;
+    delayRounds = (new Date()).getTime();
+    hitSound = document.getElementById('sound');
+    hitSound.src = 'click.mp3';
+    document.addEventListener('keydown', MovePlayerPaddle);
+    document.addEventListener('keyup', StopPlayerPaddle);
+    Draw();
+}
 
 //draw
 
