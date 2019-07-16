@@ -1,6 +1,6 @@
 let canvas;
 let context;
-let WINNING_SCORE = 3;
+let WINNING_SCORE = 1;
 
 let DIRECTION = {
     STOPPED: 0,
@@ -18,7 +18,7 @@ class Paddle {
         this.y = canvas.height/2;
         this.score = 0;
         this.move = DIRECTION.STOPPED;
-        this.speed = 11;
+        this.speed = 18;
     }
 }
 
@@ -30,6 +30,7 @@ class Ball {
         this.y = canvas.height/2;
         this.moveX = DIRECTION.STOPPED;
         this.moveY = DIRECTION.STOPPED;
+        this.speed = speed;
     }
 }
 
@@ -38,9 +39,9 @@ let aiPlayer;
 let ball;
 let running = false;
 let gameOver = false;
-let delayRounds;
+let delayRound;
 let startTarget;
-let hitSound;
+let hitSound, laughtrack, winSound;
 
 document.addEventListener('DOMContentLoaded', SetupCanvas);
 
@@ -48,27 +49,37 @@ document.addEventListener('DOMContentLoaded', SetupCanvas);
 function SetupCanvas() {
     canvas = document.getElementById('game-canvas');
     context = canvas.getContext('2d');
+    
     canvas.width = 1400;
     canvas.height = 1000;
+
     player = new Paddle('left');
     aiPlayer = new Paddle('poop');
-    ball = new Ball(7);
     aiPlayer.speed = 6.5;
+    
+    ball = new Ball(7);
     startTarget = player;
-    delayRounds = (new Date()).getTime();
-    hitSound = document.getElementById('sound');
+    delayRound = (new Date()).getTime();
+    
+    hitSound = document.getElementById('hit-sound');
     hitSound.src = 'click.mp3';
+    winSound = document.getElementById('win-sound');
+    winSound.src = 'wow_2.mp3';
+    loseSound = document.getElementById('lose-sound');
+    loseSound.src = 'laughtrack.mp3';
+
     document.addEventListener('keydown', MovePlayerPaddle);
     document.addEventListener('keyup', StopPlayerPaddle);
+    
     Draw();
 }
 
 //draw
 function Draw() {
-    context.clearRect(0,0,canvas.width,canvas.height);
+    context.clearRect(0, 0, canvas.width, canvas.height);
     
     context.fillStyle = 'black';
-    context.fillRect(0,0,canvas.width,canvas.height);
+    context.fillRect(0, 0, canvas.width, canvas.height);
     
     context.fillStyle = 'white';
     context.fillRect(player.x, player.y, player.width, player.height);
@@ -78,16 +89,18 @@ function Draw() {
     context.textAlign = 'center';
     context.fillText(player.score.toString(), (canvas.width/2) - 300, 100);
     context.fillText(aiPlayer.score.toString(), (canvas.width/2) + 300, 100);
-    
+
     context.fillStyle = 'red';
     context.fillRect(ball.x, ball.y, ball.width, ball.height);
 
-
+    context.fillStyle = 'pink';
     if (player.score == WINNING_SCORE) {
         context.fillText("Player 1 wins!", canvas.width/2, 300);
+        winSound.play();
         gameOver = true;
     } else if (aiPlayer.score == WINNING_SCORE) {
         context.fillText("AI wins!", canvas.width/2, 300);
+        loseSound.play();
         gameOver = true;
     }
 }
@@ -108,15 +121,71 @@ function Update() {
         }
 
         if (player.move == DIRECTION.DOWN)  {
-            player.y += player.speed;
+            player.y = player.y > (canvas.height - player.height) ? (canvas.height - player.height) : player.y + player.speed;
+            // player.y += player.speed;
         } else if (player.move == DIRECTION.UP) {
-            player.y -= player.speed;
+            player.y = player.y < 0 ? 0 : player.y - player.speed;
+            // player.y -= player.speed;
         }
 //maybe use max in above conditionals instead of these conditionals below
-        if (player.y < 0) {
-            player.y = 0;
-        } else if (player.y >= (canvas.height - player.height)) {
-            player.y = canvas.height - player.height;
+        // if (player.y < 0) {
+        //     player.y = 0;
+        // } else if (player.y >= (canvas.height - player.height)) {
+        //     player.y = canvas.height - player.height;
+        // }
+
+        if (AddADelay() && startTarget) {
+            ball.moveX = startTarget === player ? DIRECTION.LEFT : DIRECTION.RIGHT;
+            ball.moveY = [DIRECTION.UP, DIRECTION.DOWN][Math.round(Math.random())];
+
+            ball.y = canvas.height / 2;
+            // ball.x = canvas.width / 2;
+
+            startTarget = null;
+        }
+
+        if (ball.moveY == DIRECTION.UP) {
+            ball.y -= ball.speed;
+        } else if (ball.moveY == DIRECTION.DOWN) {
+            ball.y += ball.speed;
+        }
+
+        if (ball.moveX == DIRECTION.LEFT) {
+            ball.x -= ball.speed;
+        } else if (ball.moveX == DIRECTION.RIGHT) {
+            ball.x += ball.speed;
+        }
+
+        if (ball.moveX == DIRECTION.RIGHT) {
+            if (aiPlayer.y > ball.y - (aiPlayer.height / 2)) {
+                aiPlayer.y -= aiPlayer.speed;
+            }
+
+            if (aiPlayer.y < ball.y - (aiPlayer.height / 2)) {
+                aiPlayer.y += aiPlayer.speed;
+            }
+        }
+
+        if (aiPlayer.y < 0) {
+            aiPlayer.y = 0;
+        } else if (aiPlayer.y >= (canvas.height - aiPlayer.height)) {
+            aiPlayer.y = canvas.height - aiPlayer.height;
+        }
+
+        //ball collision
+        if (ball.x - ball.width <= player.x && ball.x >= player.x - player.width) {
+            if (ball.y <= player.y +player.height && ball.y + ball.height >= player.y) {
+                ball.moveX = DIRECTION.RIGHT;
+                hitSound.play();
+            }
+        
+        }
+
+        if (ball.x - ball.width <= aiPlayer.x && ball.x >= aiPlayer.x - aiPlayer.width) {
+            if (ball.y <= aiPlayer.y + aiPlayer.height && ball.y + ball.height >= aiPlayer.y) {
+                ball.moveX = DIRECTION.LEFT;
+                hitSound.play();
+            }
         }
     }
 }
@@ -140,7 +209,9 @@ function StopPlayerPaddle(event) {
 
 //game loop
 function GameLoop() {
-
+    Update();
+    Draw();
+    if(!gameOver) requestAnimationFrame(GameLoop);
 }
 
 //reset ball
@@ -149,7 +220,10 @@ function ResetBall(scoringPlayer) {
     // let newBallSpeed = ball.speed + .2;
     ball = new Ball(7);
     startTarget = scoringPlayer == player ? aiPlayer : player;
-    delayAmount = (new Date()).getTime();
+    delayRound = (new Date()).getTime();
 }
 
 //add delay
+function AddADelay() {
+    return ((new Date()).getTime() - delayRound >= 1000);
+}
