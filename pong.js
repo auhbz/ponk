@@ -7,7 +7,7 @@
 
 let canvas;
 let context;
-let WINNING_SCORE = 3;
+const WINNING_SCORE = 3;
 
 let DIRECTION = {
     STOPPED: 0,
@@ -48,21 +48,22 @@ let running = false;
 let gameOver = false;
 let delayRound;
 let startTarget;
-let hitSound, laughtrack, winSound;
+let hitSound, laughtrack, winSound, startSound;
 
 document.addEventListener('DOMContentLoaded', SetupCanvas);
 
 //setup
 function SetupCanvas() {
+    gameOver = false;
     canvas = document.getElementById('game-canvas');
     context = canvas.getContext('2d');
     
-    canvas.width = 1400;
-    canvas.height = 600;
+    canvas.width = 1600;
+    canvas.height = 800;
 
     player = new Paddle('left');
     aiPlayer = new Paddle('poop');
-    aiPlayer.speed = 5;
+    aiPlayer.speed = 5.6;
     
     ball = new Ball(7);
     startTarget = player;
@@ -74,10 +75,13 @@ function SetupCanvas() {
     winSound.src = 'wow_2.mp3';
     loseSound = document.getElementById('lose-sound');
     loseSound.src = 'laughtrack.mp3';
+    startSound = document.getElementById('start-sound');
+    startSound.src = 'quickFart.mp3';
 
     document.addEventListener('keydown', MovePlayerPaddle);
     document.addEventListener('keyup', StopPlayerPaddle);
     
+    // startSound.play();
     Draw();
 }
 
@@ -129,17 +133,9 @@ function Update() {
 
         if (player.move == DIRECTION.DOWN)  {
             player.y = player.y > (canvas.height - player.height) ? (canvas.height - player.height) : player.y + player.speed;
-            // player.y += player.speed;
         } else if (player.move == DIRECTION.UP) {
-            player.y = player.y < 0 ? 0 : player.y - player.speed;
-            // player.y -= player.speed;
+            player.y = player.y < 0 ? 0 : player.y - player.speed;           
         }
-//maybe use max in above conditionals instead of these conditionals below
-        // if (player.y < 0) {
-        //     player.y = 0;
-        // } else if (player.y >= (canvas.height - player.height)) {
-        //     player.y = canvas.height - player.height;
-        // }
 
         if (AddADelay() && startTarget) {
             ball.moveX = startTarget === player ? DIRECTION.LEFT : DIRECTION.RIGHT;
@@ -204,9 +200,10 @@ function MovePlayerPaddle(key) {
         window.requestAnimationFrame(GameLoop);
     }
 
-    if (key.keyCode == 38 || key.keycode == 87) player.move = DIRECTION.UP;
-    if (key.keyCode == 40 || key.keycode == 83) player.move = DIRECTION.DOWN;
+    if (key.keyCode == 38 || key.keyCode == 87) player.move = DIRECTION.UP;
+    if (key.keyCode == 40 || key.keyCode == 83) player.move = DIRECTION.DOWN;
 
+    if (key.keyCode == 13 && gameOver) SetupCanvas();
 }
 
 //stop player
@@ -215,7 +212,7 @@ function StopPlayerPaddle(event) {
 }
 
 //game loop
-function GameLoop() {
+function GameLoop() { 
     Update();
     Draw();
     if(!gameOver) requestAnimationFrame(GameLoop);
