@@ -1,13 +1,12 @@
 //TODO:
-//clean things up, const/let things that are used throughout, improve readability
-//implement 2 player mode
-//fine tune speeds, paddle size, canvas size, colors...
-//make the W and S keys actually work
-//start new game
+//start menu- options(difficulty, score, mode, color), start
 
 let canvas;
 let context;
 const WINNING_SCORE = 3;
+
+let aiSpeed = 6.5;
+let ballSpeed = 9;
 
 let DIRECTION = {
     STOPPED: 0,
@@ -63,9 +62,9 @@ function SetupCanvas() {
 
     player = new Paddle('left');
     aiPlayer = new Paddle('poop');
-    aiPlayer.speed = 5.6;
+    aiPlayer.speed = aiSpeed;
     
-    ball = new Ball(7);
+    ball = new Ball(ballSpeed);
     startTarget = player;
     delayRound = (new Date()).getTime();
     
@@ -221,8 +220,9 @@ function GameLoop() {
 //reset ball
 function ResetBall(scoringPlayer) {
     scoringPlayer.score++;
-    let newBallSpeed = ball.speed + 3;
+    let newBallSpeed = ball.speed + 2;
     ball = new Ball(newBallSpeed);
+    aiPlayer.speed += 2;
     startTarget = scoringPlayer == player ? aiPlayer : player;
     delayRound = (new Date()).getTime();
 }
