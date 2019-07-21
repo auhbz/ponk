@@ -59,15 +59,28 @@ function SetupCanvas() {
     
     canvas.width = 1600;
     canvas.height = 800;
+    SetPaddles();
+    SetBall();
+    SetSounds();
 
+    document.addEventListener('keydown', MovePlayerPaddle);
+    document.addEventListener('keyup', StopPlayerPaddle);
+    
+    // startSound.play();
+    Draw();
+}
+
+function SetPaddles() {
     player = new Paddle('left');
     aiPlayer = new Paddle('poop');
     aiPlayer.speed = aiSpeed;
-    
+}
+function SetBall() {    
     ball = new Ball(ballSpeed);
     startTarget = player;
     delayRound = (new Date()).getTime();
-    
+}
+function SetSounds() {
     hitSound = document.getElementById('hit-sound');
     hitSound.src = 'click.mp3';
     winSound = document.getElementById('win-sound');
@@ -76,12 +89,6 @@ function SetupCanvas() {
     loseSound.src = 'laughtrack.mp3';
     startSound = document.getElementById('start-sound');
     startSound.src = 'quickFart.mp3';
-
-    document.addEventListener('keydown', MovePlayerPaddle);
-    document.addEventListener('keyup', StopPlayerPaddle);
-    
-    // startSound.play();
-    Draw();
 }
 
 //draw
