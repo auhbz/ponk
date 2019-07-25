@@ -88,8 +88,8 @@ function SetSounds() {
     loseSound = document.getElementById('lose-sound');
     loseSound.src = 'laughtrack.mp3';
     
-    startSound = document.getElementById('start-sound');
-    startSound.src = 'quickFart.mp3';
+    fartSound = document.getElementById('start-sound');
+    fartSound.src = 'quickFart.mp3';
 }
 
 //draw
@@ -194,7 +194,7 @@ function Update() {
         if (ball.x - ball.width <= aiPlayer.x && ball.x >= aiPlayer.x - aiPlayer.width) {
             if (ball.y <= aiPlayer.y + aiPlayer.height && ball.y + ball.height >= aiPlayer.y) {
                 ball.moveX = DIRECTION.LEFT;
-                hitSound.play();
+                fartSound.play();
             }
         }
     }
