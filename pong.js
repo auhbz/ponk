@@ -1,11 +1,8 @@
-//TODO:
-//start menu- options(difficulty, score, mode, color), start
-
 let canvas;
 let context;
-const WINNING_SCORE = 3;
+const WINNING_SCORE = 5;
 
-let aiSpeed = 6.5;
+let aiSpeed = 7.5;
 let ballSpeed = 9;
 
 let DIRECTION = {
@@ -19,12 +16,12 @@ let DIRECTION = {
 class Paddle {
     constructor(side) {
         this.width = 15;
-        this.height = 65;
-        this.x = side === 'left' ? 150 : canvas.width - 150;
+        this.height = 75;
+        this.x = side === 'left' ? 10 : canvas.width - 20;
         this.y = canvas.height/2;
         this.score = 0;
         this.move = DIRECTION.STOPPED;
-        this.speed = 11;
+        this.speed = 16;
     }
 }
 
@@ -72,6 +69,7 @@ function SetupCanvas() {
 
 function SetPaddles() {
     player = new Paddle('left');
+
     aiPlayer = new Paddle('poop');
     aiPlayer.speed = aiSpeed;
 }
@@ -83,10 +81,13 @@ function SetBall() {
 function SetSounds() {
     hitSound = document.getElementById('hit-sound');
     hitSound.src = 'click.mp3';
+
     winSound = document.getElementById('win-sound');
     winSound.src = 'wow_2.mp3';
+
     loseSound = document.getElementById('lose-sound');
     loseSound.src = 'laughtrack.mp3';
+    
     startSound = document.getElementById('start-sound');
     startSound.src = 'quickFart.mp3';
 }
@@ -227,9 +228,15 @@ function GameLoop() {
 //reset ball
 function ResetBall(scoringPlayer) {
     scoringPlayer.score++;
-    let newBallSpeed = ball.speed + 2;
+    let newBallSpeed = ball.speed + 1.5;
     ball = new Ball(newBallSpeed);
-    aiPlayer.speed += 2;
+    if (scoringPlayer == player) {
+        aiPlayer.speed += 1.4;
+        console.log("boop");
+    } else if (scoringPlayer == aiPlayer) {
+        aiPlayer.speed += 1.2
+        console.log("hello");
+    }
     startTarget = scoringPlayer == player ? aiPlayer : player;
     delayRound = (new Date()).getTime();
 }
