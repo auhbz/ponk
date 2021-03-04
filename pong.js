@@ -232,10 +232,8 @@ function ResetBall(scoringPlayer) {
     ball = new Ball(newBallSpeed);
     if (scoringPlayer == player) {
         aiPlayer.speed += 1.4;
-        console.log("boop");
     } else if (scoringPlayer == aiPlayer) {
         aiPlayer.speed += 1.2
-        console.log("hello");
     }
     startTarget = scoringPlayer == player ? aiPlayer : player;
     delayRound = (new Date()).getTime();
